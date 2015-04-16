@@ -19,6 +19,8 @@ public class Result {
 	
 	private String rede;
 
+	private String cluster;
+
 	public String getInstanceName() {
 		return instanceName;
 	}
@@ -81,5 +83,13 @@ public class Result {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(String cluster) {
+		this.cluster = cluster;
 	}
 }

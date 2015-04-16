@@ -134,6 +134,9 @@ public class FilterController {
 		filter.setDatacenter(StringUtils.isEmpty(filter.getDatacenter()) ? "%" : filter.getDatacenter());
 
 		List<Result> byFilters = filterDao.getByFilters(filter);
+		
+		// separação do resultado por cluster -> tipo -> datacenter.
+		List<Cluster> clusterList = createClusterList(byFilters);
 		Map<String, List<Result>> map = new LinkedHashMap<String, List<Result>>();
 		Set<String> set = new HashSet<String>();
 		Set<String> setInstanceName = new HashSet<String>();
@@ -228,11 +231,120 @@ public class FilterController {
 		}
 
 //		model.addAttribute("filterResult", byFilters);
+
+		model.addAttribute("clusterList", clusterList);
+
 		model.addAttribute("response", responseList);
 		model.addAttribute("hostname", set.size());
 		model.addAttribute("instanceName", setInstanceName.size());
 		model.addAttribute("show", filter.getShow());
 
 		return "result";
+	}
+
+	private List<Cluster> createClusterList(List<Result> resultList) {
+		List<Cluster> clusterList = new ArrayList<Cluster>();
+		Map<String, List<Result>> map = new LinkedHashMap<String, List<Result>>();
+
+		for (Result result : resultList) {
+			if (map.containsKey(result.getCluster())) {
+				map.get(result.getCluster()).add(result);
+			} else {
+				List<Result> list = new ArrayList<Result>();
+				list.add(result);
+				map.put(result.getCluster(), list);
+			}
+		}
+		
+		for (Entry<String, List<Result>> entry : map.entrySet()) {
+			Cluster cluster = new Cluster(getClusterName(entry.getKey()));
+
+			cluster.setTypes(new ArrayList<Type>());
+
+			for (Entry<String, List<Result>> resultMap : map.entrySet()) {
+				Map<String, List<Result>> typeMap = new LinkedHashMap<String, List<Result>>();
+
+				for (Result result : resultMap.getValue()) {
+					String palavra = StringUtils.isEmpty(result.getType()) ? result.getServiceComponent() : result.getType(); 
+
+					if (typeMap.containsKey(palavra)) {
+						typeMap.get(palavra).add(result);
+					} else {
+						List<Result> list = new ArrayList<Result>();
+						list.add(result);
+						typeMap.put(palavra, list);
+					}
+				}
+
+				for (Entry<String, List<Result>> types : typeMap.entrySet()) {
+					Type type = new Type(types.getKey());
+
+				    Datacenter datacenterNorte = new Datacenter("Datacenter Norte");
+				    Datacenter datacenterSul = new Datacenter("Datacenter Sul");
+				    Datacenter datacenterPaulista = new Datacenter("Datacenter Paulista");
+				    Datacenter datacenterCasaUm = new Datacenter("Datacenter Casa 1");
+				    Datacenter datacenterExtendido = new Datacenter("Datacenter Extendido");
+				    Datacenter noDatacenter = new Datacenter("Datacenter Não Encontrado");
+
+				    for (Result result : entry.getValue()) {
+						if(StringUtils.isEmpty(result.getDatacenter())) {
+							noDatacenter.getResults().add(result);
+						} else if(result.getDatacenter().equalsIgnoreCase("dcn")) {
+							datacenterNorte.getResults().add(result);
+						} else if(result.getDatacenter().equalsIgnoreCase("dcs")) {
+							datacenterSul.getResults().add(result);
+						} else if(result.getDatacenter().equalsIgnoreCase("cs1")) {
+							datacenterCasaUm.getResults().add(result);
+						} else if(result.getDatacenter().equalsIgnoreCase("pta")) {
+							datacenterPaulista.getResults().add(result);
+						} else if(result.getDatacenter().equalsIgnoreCase("dce") || result.getDatacenter().equalsIgnoreCase("dcex")) {
+							datacenterExtendido.getResults().add(result);
+						}
+					}
+
+				    if(!noDatacenter.getResults().isEmpty()) {
+				    	type.getDatacenters().add(noDatacenter);
+				    }
+
+				    if(!datacenterNorte.getResults().isEmpty()) {
+				    	type.getDatacenters().add(datacenterNorte);
+				    }
+
+				    if(!datacenterSul.getResults().isEmpty()) {
+				    	type.getDatacenters().add(datacenterSul);
+				    }
+
+				    if(!datacenterPaulista.getResults().isEmpty()) {
+				    	type.getDatacenters().add(datacenterPaulista);
+				    }
+
+				    if(!datacenterCasaUm.getResults().isEmpty()) {
+				    	type.getDatacenters().add(datacenterCasaUm);
+				    }
+
+				    if(!datacenterExtendido.getResults().isEmpty()) {
+				    	type.getDatacenters().add(datacenterExtendido);
+				    }
+				    
+				    cluster.getTypes().add(type);
+				}
+			}
+			
+			clusterList.add(cluster);
+		}
+
+		return clusterList;
+	}
+
+	private String getClusterName(String key) {
+		String clusterName = key;
+
+		if(key.equalsIgnoreCase("Linux") || key.equalsIgnoreCase("Unix")) {
+			clusterName = "AIX";
+		} else if(key.equalsIgnoreCase("Wintel")) {
+			clusterName = "Windows";
+		}
+
+		return clusterName;
 	}
 }

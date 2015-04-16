@@ -43,7 +43,9 @@ public class FilterDAOImpl implements FilterDAO {
 			stringBuilder.append("bs_cmdb.nm_busi_srvc_cmdb AS BUSINESSSERVICE, ");
 			stringBuilder.append("ts_cmdb.nm_tecn_srvc_cmdb AS TECHNICALSERVICE, ");
 			stringBuilder.append("sc_cmdb.nm_srvc_comp_cmdb AS SERVICECOMPONENT, ");
-			stringBuilder.append("cmdb.NM_REDE_DIST AS REDE ");
+			stringBuilder.append("cmdb.NM_REDE_DIST AS REDE, ");
+			stringBuilder.append("cmdb.CD_HYPE_GRUP AS HYPENAME, ");
+			stringBuilder.append("cmdb.NM_SRVD_PLAT AS CLUSTER ");
 			stringBuilder.append("from tb_cmdb cmdb ");
 			stringBuilder.append("left join HYPERVISOR hyper ");
 			stringBuilder.append("ON hyper.hyp_id = cmdb.cd_hype ");
@@ -69,7 +71,9 @@ public class FilterDAOImpl implements FilterDAO {
 			stringBuilder.append("bs_cmdb.nm_busi_srvc_cmdb, ");
 			stringBuilder.append("ts_cmdb.nm_tecn_srvc_cmdb, ");
 			stringBuilder.append("sc_cmdb.nm_srvc_comp_cmdb, ");
-			stringBuilder.append("cmdb.NM_REDE_DIST ");
+			stringBuilder.append("cmdb.NM_REDE_DIST, ");
+			stringBuilder.append("cmdb.CD_HYPE_GRUP, ");
+			stringBuilder.append("cmdb.NM_SRVD_PLAT ");
 			stringBuilder.append("ORDER BY type.TYPE DESC ");
 
 			Query createNativeQuery = em.createNativeQuery(stringBuilder.toString());
@@ -99,6 +103,8 @@ public class FilterDAOImpl implements FilterDAO {
 				result.setServiceComponent(getString(resultObject[6]));
 				result.setRede(getString(resultObject[7]));
 				
+				getClusterName(result, resultObject);
+
 				resultList.add(result);
 			}
 			
@@ -107,6 +113,14 @@ public class FilterDAOImpl implements FilterDAO {
 			return null;
 		} catch (NoResultException e) {
 			return null;
+		}
+	}
+
+	private void getClusterName(Result result, Object[] resultObject) {
+		if(!StringUtils.isEmpty(getString(resultObject[8]))) {
+			result.setCluster("ESX Local");
+		} else {
+			result.setCluster(getString(resultObject[9]));
 		}
 	}
 

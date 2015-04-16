@@ -8,6 +8,15 @@ public class Cluster {
 
 	private List<Type> types;
 
+	public Cluster() {
+		super();
+	}
+
+	public Cluster(String name) {
+		super();
+		this.name = name;
+	}
+
 	public String getName() {
 		return name;
 	}
