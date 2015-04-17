@@ -19,6 +19,13 @@ public class CmdbReaderController {
 	@Autowired
 	private HypervisorReader hypervisorReader;
 
+	@RequestMapping(value = "/updateAll", method = RequestMethod.GET)
+	public void updateAll() throws FileNotFoundException {
+		update();
+		hyper();
+		datacenter();
+	}
+
 	@RequestMapping(value = "/update", method = RequestMethod.GET)
 	public void update() throws FileNotFoundException {
 		cmdbReader.update();
@@ -27,5 +34,10 @@ public class CmdbReaderController {
 	@RequestMapping(value = "/updateHyper", method = RequestMethod.GET)
 	public void hyper() throws FileNotFoundException {
 		hypervisorReader.update();
+	}
+
+	@RequestMapping(value = "/updateDatacenter", method = RequestMethod.GET)
+	public void datacenter() throws FileNotFoundException {
+		hypervisorReader.updateDatacenter();
 	}
 }

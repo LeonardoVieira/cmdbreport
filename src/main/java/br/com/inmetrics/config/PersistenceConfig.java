@@ -43,7 +43,7 @@ public class PersistenceConfig {
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 
-		vendorAdapter.setGenerateDdl(Boolean.FALSE);
+		vendorAdapter.setGenerateDdl(Boolean.TRUE);
 		vendorAdapter.setShowSql(Boolean.FALSE);
 
 		factory.setDataSource(dataSource());
@@ -52,7 +52,7 @@ public class PersistenceConfig {
 
 		Properties jpaProperties = new Properties();
 
-//		jpaProperties.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
+		jpaProperties.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
 		jpaProperties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
 		
 		factory.setJpaProperties(jpaProperties);

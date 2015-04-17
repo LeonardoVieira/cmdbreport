@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.inmetrics.dao.HypervisorDAO;
+import br.com.inmetrics.model.csv.Datacenter;
 import br.com.inmetrics.model.csv.Hypervisor;
 
 @Repository
@@ -31,5 +32,18 @@ public class HypervisorDaoImpl implements HypervisorDAO {
 		for (Hypervisor hypervisor : hypervisors) {
 			em.persist(hypervisor);
 		}
+	}
+
+	@Override
+	public void updateDatacenter(List<Datacenter> datacenters) {
+		deleteDatacenter();
+		for (Datacenter datacenter : datacenters) {
+			em.persist(datacenter);
+		}
+	}
+
+	public void deleteDatacenter() {
+		Query createNativeQuery = em.createNativeQuery("DELETE FROM DATACENTER");
+		createNativeQuery.executeUpdate();
 	}
 }
